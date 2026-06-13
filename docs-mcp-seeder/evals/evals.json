@@ -1,0 +1,30 @@
+{
+  "skill_name": "docs-mcp-seeder",
+  "notes": "Evals run against the LIVE docs-mcp-server on localhost:6280 (healthy, OPENAI_API_KEY set). Targets are grounded in the server's actual state as of creation: langgraph had only 3 docs (broken), anthropic-api had 0 docs, htmx was absent. All existing libraries use unversioned (version='') buckets.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "fix-broken-langgraph-mcp-url",
+      "prompt": "My docs-mcp-server is at http://localhost:6280/mcp but it's barely got any LangGraph documentation indexed — searches for things like graph interrupts or checkpointers come back almost empty. Can you pull in the latest LangGraph docs properly so it's actually searchable?",
+      "expected_output": "Skill normalizes the /mcp URL to .../api, runs a preflight list and notices langgraph exists but with a tiny doc count (broken), resolves the canonical LangGraph docs URL (langchain-ai.github.io/langgraph or langchain's current docs site), scrapes into the EXISTING unversioned 'langgraph' slug (no spurious --version), waits for completion, then verifies with a search that now returns relevant hits. Reports pages indexed + verification.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "multi-fuzzy-categories-default-server",
+      "prompt": "Can you populate my local docs server with up-to-date docs for two things: the Anthropic Python SDK and the Model Context Protocol spec? It's the usual one on port 6280.",
+      "expected_output": "Skill infers the default server (localhost:6280 -> .../api), runs a preflight list, web-searches to resolve BOTH categories to canonical official docs URLs (Anthropic SDK -> docs.anthropic.com or the anthropic-sdk-python GitHub docs; MCP spec -> modelcontextprotocol.io), reuses the existing 'anthropic-api' (currently 0 docs) slug rather than inventing a new one where applicable, scrapes both, polls to completion, verifies each with a search, and reports a per-category table. Flags nothing as silently failed.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "new-small-library-explicit-base-url",
+      "prompt": "Index the HTMX docs into my docs-mcp-server (http://localhost:6280) — I want to be able to search for hx-swap and hx-trigger behavior afterwards.",
+      "expected_output": "Skill normalizes to .../api, preflight shows htmx is absent (new library), resolves the canonical HTMX docs URL (htmx.org/docs and the reference), scrapes a new unversioned 'htmx' library bounded with subpages scope, verifies with a search for hx-swap / hx-trigger returning hits, and reports pages indexed + verification result.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}
